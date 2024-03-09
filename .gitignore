@@ -1,0 +1,8 @@
+# write all gitignore files for go gin project
+
+/.env
+/.env.local
+/.env.development
+.env
+.env.local
+
