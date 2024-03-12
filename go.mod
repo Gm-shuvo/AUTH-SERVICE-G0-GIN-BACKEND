@@ -1,4 +1,4 @@
-module ginGo
+module github.com/gmshuvo/go-gin-postgres
 
 go 1.22.1
 

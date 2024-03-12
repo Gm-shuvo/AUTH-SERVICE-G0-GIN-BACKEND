@@ -1,8 +1,9 @@
-package models
+package config
 
 import (
 	"fmt"
 	"os"
+	// m "github.com/gmshuvo/go-gin-postgres/src/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,14 +31,11 @@ func GetDB() *gorm.DB {
 	return db
 }
 
-func MigrateDB() {
-	db.AutoMigrate(&User{}) // Ensure the User model is defined elsewhere in your package
-}
 
 func CloseDB() {
-	sqlDB, err := db.DB()
+	psqlDB, err := db.DB()
 	if err != nil {
 		panic("failed to close database connection")
 	}
-	sqlDB.Close()
+	psqlDB.Close()
 }

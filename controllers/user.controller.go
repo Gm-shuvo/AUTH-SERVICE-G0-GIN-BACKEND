@@ -1,17 +1,21 @@
 package controllers
 
 import (
-	"ginGo/src/models"
+	m "github.com/gmshuvo/go-gin-postgres/models"
+	s "github.com/gmshuvo/go-gin-postgres/services"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UserController struct{}
+type UserController struct {
+	// struct for user controller
+
+}
 
 func (u UserController) FindAll(c *gin.Context) {
-	users, err := models.FindAllUsers()
+	users, err := s.FindAllUsers()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -26,7 +30,7 @@ func (u UserController) FindById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := models.FindUserById(id)
+	user, err := s.FindUserById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -35,12 +39,12 @@ func (u UserController) FindById(c *gin.Context) {
 }
 
 func (u UserController) Create(c *gin.Context) {
-	var newUser models.User
+	var newUser m.User
 	if err := c.ShouldBindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	createdUser, err := models.CreateUser(&newUser)
+	createdUser, err := s.CreateUser(&newUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -54,14 +58,14 @@ func (u UserController) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
-	var updatedUserData models.User
+	var updatedUserData m.User
 	if err := c.ShouldBindJSON(&updatedUserData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	updatedUserData.ID = uint(id) // Assuming ID is of type uint in your User model
-	updatedUser, err := models.UpdateUser(&updatedUserData)
+	updatedUser, err := s.UpdateUser(&updatedUserData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -77,7 +81,7 @@ func (u UserController) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
-	err = models.DeleteUserById(id)
+	err = s.DeleteUserById(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
