@@ -6,3 +6,6 @@
 .env
 .env.local
 
+# ignore tmp files
+/tmp
+/tmp/*
