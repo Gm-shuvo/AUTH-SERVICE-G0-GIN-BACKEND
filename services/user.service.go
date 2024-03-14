@@ -9,14 +9,14 @@ import (
 
 
 // Create user
-func CreateUser(u *m.User) (*m.User, error) {
-	user, err := repo.CreateUser(u)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+// func CreateUser(u *m.User) (*m.User, error) {
+// 	user, err := repo.CreateUser(u)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return user, nil
 
-}
+// }
 
 // Find user by email
 func FindUserByEmail(email string) (*m.User, error) {
@@ -29,9 +29,11 @@ func FindUserByEmail(email string) (*m.User, error) {
 
 // Find user by id
 func FindUserById(id int) (*m.User, error) {
-	var user m.User
-	err := c.GetDB().Where("id = ?", id).First(&user).Error
-	return &user, err
+	user, err := repo.FindUserById(id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // Find all users
@@ -43,6 +45,7 @@ func FindAllUsers() ([]m.User, error) {
 
 // Update user
 func UpdateUser(u *m.User) (*m.User, error) {
+	
 	err := c.GetDB().Model(&u).Updates(u).Error
 	if err != nil {
 		return nil, err

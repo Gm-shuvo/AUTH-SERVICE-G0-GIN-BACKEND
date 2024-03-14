@@ -5,19 +5,15 @@ import (
 	m "github.com/gmshuvo/go-gin-postgres/models"
 )
 
-// called db migration
-func MigrateDB() {
-	c.GetDB().AutoMigrate(&m.User{})
-}
 
-// Create user 
-func CreateUser(u *m.User) (*m.User, error) {
-	err := c.GetDB().Model(&u).Create(u).Error
-	if err != nil {
-		return nil, err
-	}
-	return u, nil
-}
+// // Create user 
+// func CreateUser(u *m.User) (*m.User, error) {
+// 	err := c.GetDB().Model(&u).Create(u).Error
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return u, nil
+// }
 
 // Find user by email
 func FindUserByEmail(email string) (*m.User, error) {
@@ -26,5 +22,15 @@ func FindUserByEmail(email string) (*m.User, error) {
 	if err != nil {
 		return nil, err
 	}
+	return &user, nil
+}
+
+func FindUserById(id int) (*m.User, error) {
+	var user m.User
+	err := c.GetDB().Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	
 	return &user, nil
 }
