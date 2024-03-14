@@ -1,21 +1,30 @@
 package controllers
 
 import (
-	m "github.com/gmshuvo/go-gin-postgres/models"
-	s "github.com/gmshuvo/go-gin-postgres/services"
-	"github.com/gmshuvo/go-gin-postgres/utils"
 	"net/http"
 	"strconv"
 
+
 	"github.com/gin-gonic/gin"
+
+	"github.com/gmshuvo/go-gin-postgres/models"
+	"github.com/gmshuvo/go-gin-postgres/utils"
 )
 
 type UserController struct {
-
+	UserService models.UserService
 }
 
-func (u UserController) FindAll(c *gin.Context) {
-	users, err := s.FindAllUsers()
+// func NewUserController(us models.UserService, timeout time.Duration) *userController {
+// 	return &userController{
+// 		userService: us,
+
+// 	}
+// }
+
+
+func (uc *UserController) FindAll(c *gin.Context) {
+	users, err := uc.UserService.FindAllUsers(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -23,36 +32,22 @@ func (u UserController) FindAll(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-func (u UserController) FindById(c *gin.Context) {
-	// id := c.Param("id")
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	user, err := s.FindUserById(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, user)
-}
-
-// func (u UserController) Create(c *gin.Context) {
-// 	var newUser m.User
-// 	if err := c.ShouldBindJSON(&newUser); err != nil {
+// func (uc *UserController) FindById(c *gin.Context) {
+// 	// id := c.Param("id")
+// 	id, err := strconv.Atoi(c.Param("id"))
+// 	if err != nil {
 // 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 // 		return
 // 	}
-// 	createdUser, err := s.CreateUser(&newUser)
+// 	user, err := uc.UserService.FindUserById(id)
 // 	if err != nil {
 // 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 // 		return
 // 	}
-// 	c.JSON(http.StatusCreated, createdUser)
+// 	c.JSON(http.StatusOK, user)
 // }
 
-func (u UserController) Update(c *gin.Context) {
+func (uc *UserController) Update(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
@@ -61,12 +56,12 @@ func (u UserController) Update(c *gin.Context) {
 
 	// check if user exists
 	
-	_, err = s.FindUserById(id)
+	// _, err = uc.UserService.FindUserById(id)
 
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	// 	return
+	// }
 
 
 	// check login status
@@ -75,7 +70,7 @@ func (u UserController) Update(c *gin.Context) {
 		return
 	}
 
-	var updatedUserData m.User
+	var updatedUserData models.User
 	if err := c.ShouldBindJSON(&updatedUserData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -83,10 +78,10 @@ func (u UserController) Update(c *gin.Context) {
 
 	updatedUserData.ID = uint(id) // Assuming ID is of type uint in your User model
 
-	
+
 	
 
-	updatedUser, err := s.UpdateUser(&updatedUserData)
+	updatedUser, err := uc.UserService.UpdateUser(c, &updatedUserData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -96,13 +91,13 @@ func (u UserController) Update(c *gin.Context) {
 }
 
 // Delete user by id
-func (u UserController) Delete(c *gin.Context) {
+func (uc *UserController) Delete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
-	err = s.DeleteUserById(id)
+	err = uc.UserService.DeleteUserById(c, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -2,35 +2,35 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	c "github.com/gmshuvo/go-gin-postgres/config"
-	r "github.com/gmshuvo/go-gin-postgres/routes"
-	u "github.com/gmshuvo/go-gin-postgres/utils"
+	 "github.com/gmshuvo/go-gin-postgres/config"
+	"github.com/gmshuvo/go-gin-postgres/routes"
+	"github.com/gmshuvo/go-gin-postgres/utils"
 	"os"
 )
 
 func main() {
 	// Load the environment variables
-	u.LoadEnv()
+	utils.LoadEnv()
+	
 	// Initialize the database
-	c.InitDB()
+	db := config.InitDB()
 	// Migrate the schema
-	c.MigrateDB()
+	config.MigrateDB()
 	// Close the connection
-	defer c.CloseDB()
+	defer config.CloseDB()
 
 	// Create routers
-	router := gin.Default()
+	gin := gin.Default()
 	
-	router.SetTrustedProxies([]string{"192.168.0.1"})
+	gin.SetTrustedProxies([]string{"192.168.0.1"})
 	// make group for  routes
-	Routes := router.Group("/api/v1")
+	gRouter := gin.Group("/api/v1")
 
-	r.AuthRouters(Routes)
-	r.UserRouters(Routes)
+	routes.SetUp(gRouter, db,  2)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // Default to port 8080 if not specified
 	}
-	router.Run(":" + port)
+	gin.Run(":" + port)
 }

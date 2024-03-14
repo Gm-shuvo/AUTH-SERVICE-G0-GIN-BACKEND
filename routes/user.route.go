@@ -1,14 +1,24 @@
 package routes
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gmshuvo/go-gin-postgres/controllers"
+	"github.com/gmshuvo/go-gin-postgres/repositories"
+	"github.com/gmshuvo/go-gin-postgres/services"
+	"gorm.io/gorm"
 )
 
-func UserRouters(router *gin.RouterGroup) {
-	userController := controllers.UserController{}
-	router.GET("/users", userController.FindAll)
-	router.GET("/user/:id", userController.FindById)
-	router.PATCH("/user/:id", userController.Update)
-	router.DELETE("/user/:id", userController.Delete)
+func NewUserRouters(router *gin.RouterGroup, db *gorm.DB, timeout time.Duration) {
+	ur := repositories.NewUserRepository(db)
+	uc := &controllers.UserController{
+		UserService: services.NewUserService(ur, timeout),
+	}
+	router.GET("/users", uc.FindAll)
+	// router.GET("/user/:id", uc.FindById)
+	router.PUT("/user/:id", uc.Update)
+	router.DELETE("/user/:id", uc.Delete)
+	
 }
+	

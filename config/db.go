@@ -11,7 +11,7 @@ import (
 
 var db *gorm.DB
 
-func InitDB() {
+func InitDB() *gorm.DB{
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=Asia/Shanghai",
 		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_USER"),
@@ -25,6 +25,7 @@ func InitDB() {
 	if err != nil {
 		panic(fmt.Sprintf("failed to connect to database: %v", err))
 	}
+	return db
 }
 
 func GetDB() *gorm.DB {
