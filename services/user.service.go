@@ -4,9 +4,7 @@ import (
 	"context"
 	"time"
 
-	// "github.com/gmshuvo/go-gin-postgres/config"
 	"github.com/gmshuvo/go-gin-postgres/models"
-	// "github.com/gmshuvo/go-gin-postgres/repositories"
 )
 
 type userService struct {

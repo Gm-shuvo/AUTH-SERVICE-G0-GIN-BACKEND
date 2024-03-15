@@ -1,5 +1,6 @@
 package models
 
+import "context"
 
 // Login struct
 type Login struct {
@@ -26,4 +27,16 @@ type RegisterResponse struct {
 	Registered bool `json:"registered"`
 	Status int `json:"status"`
 	Redirect string `json:"redirect"`
+}
+
+type AuthService interface {
+	Register(c context.Context,u *User) (*User, error)
+	Login(c context.Context, u *User) (*User, error)
+	Logout(c context.Context, u *User) (*User, error)
+}
+
+type AuthRepository interface {
+	Register(u *User) (*User, error)
+	Login(u *User) (*User, error)
+	Logout(u *User) (*User, error)
 }

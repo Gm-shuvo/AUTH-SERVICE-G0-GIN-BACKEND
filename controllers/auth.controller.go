@@ -2,27 +2,27 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/gmshuvo/go-gin-postgres/config"
-	m "github.com/gmshuvo/go-gin-postgres/models"
-	s "github.com/gmshuvo/go-gin-postgres/services"
+	"github.com/gmshuvo/go-gin-postgres/models"
 	"github.com/gmshuvo/go-gin-postgres/utils"
 	"golang.org/x/crypto/bcrypt"
 
 	"net/http"
 )
 
-type AuthController struct{}
+type AuthController struct {
+	AuthService models.AuthService
+}
 
 // Register new user
-func (u AuthController) Register(c *gin.Context) {
+func (ac *AuthController) Register(c *gin.Context) {
 	// validate body
-	var body m.User
+	var body models.User
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	// auth service
-	user, err := s.Register(&body)
+	user, err := ac.AuthService.Register(c, &body)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -37,35 +37,35 @@ func (u AuthController) Register(c *gin.Context) {
 }
 
 // Login user
-func (u AuthController) Login(c *gin.Context) {
-	var body m.User
-	var _body m.User
+func (ac *AuthController) Login(c *gin.Context) {
+	var body models.User
+	// var _body models.User
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid body"})
 		return
 	}
 
-	err := config.GetDB().Where("email = ?", body.Email).First(&_body).Error
+	// err := config.GetDB().Where("email = ?", body.Email).First(&_body).Error
+
+	user, err := ac.AuthService.Login(c, &body)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
-	println(_body.Password, body.Password)
+	println(user.Password, body.Password)
 
-	err = bcrypt.CompareHashAndPassword([]byte(_body.Password), []byte(body.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Invalid User and Password"})
 		return
 	}
 
-	
-
 	// generate token with user id and email
-	token, err := utils.GenerateToken(&_body)
+	token, err := utils.GenerateToken(user)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating the token"})
@@ -83,7 +83,7 @@ func (u AuthController) Login(c *gin.Context) {
 }
 
 // Logout user
-func (u AuthController) Logout(c *gin.Context) {
+func (u *AuthController) Logout(c *gin.Context) {
 	c.SetCookie("Authorization", "", -1, "", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "User logged out"})
 }

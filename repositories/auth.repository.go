@@ -1,13 +1,21 @@
 package repositories
 
 import (
-	c "github.com/gmshuvo/go-gin-postgres/config"
-	m "github.com/gmshuvo/go-gin-postgres/models"
+	"github.com/gmshuvo/go-gin-postgres/models"
+	"gorm.io/gorm"
 )
 
+type authRepository struct {
+	db *gorm.DB
+}
+
+func NewAuthRepository(db *gorm.DB) *authRepository {
+	return &authRepository{db}
+}
+
 // Register Repository
-func Register(u *m.User) (*m.User, error) {
-	err := c.GetDB().Model(&u).Create(u).Error
+func (ar *authRepository) Register(u *models.User) (*models.User, error) {
+	err := ar.db.Model(&u).Create(u).Error
 	if err != nil {
 		return nil, err
 	}
@@ -15,9 +23,9 @@ func Register(u *m.User) (*m.User, error) {
 }
 
 // Login Repository
-func Login(u *m.User) (*m.User, error) {
-	var user m.User
-	err := c.GetDB().Where("email = ? AND password = ?", u.Email, u.Password).First(&user).Error
+func (ar *authRepository) Login(u *models.User) (*models.User, error) {
+	var user models.User
+	err := ar.db.Where("email = ?", u.Email).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -25,6 +33,6 @@ func Login(u *m.User) (*m.User, error) {
 }
 
 // Logout Repository
-func Logout(u *m.User) (*m.User, error) {
+func (ar *authRepository) Logout(u *models.User) (*models.User, error) {
 	return u, nil
 }
