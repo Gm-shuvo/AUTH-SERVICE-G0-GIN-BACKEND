@@ -11,7 +11,7 @@ import (
 func GenerateToken(u *models.User) (string, error) {
 	// Generate a JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": u.Email,
+		"sub": u.ID,
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 	signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))

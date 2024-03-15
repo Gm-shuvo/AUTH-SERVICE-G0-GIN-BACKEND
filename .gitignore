@@ -9,3 +9,18 @@
 # ignore tmp files
 /tmp
 /tmp/*
+
+# ignore binary files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ignore go binary
+*.test
+*.out
+*.app
+
+# ignore bin directory
+/bin
+/bin/*

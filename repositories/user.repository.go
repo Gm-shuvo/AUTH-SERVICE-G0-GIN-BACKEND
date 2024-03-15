@@ -42,24 +42,25 @@ func (ur *userRepository) FindAllUsers() ([]models.User, error) {
 	return users, err
 }
 
-// Create user
-func (ur *userRepository) CreateUser(u *models.User) (*models.User, error) {
-	err := ur.db.Model(&u).Create(u).Error
-	if err != nil {
-		return nil, err
-	}
-	return u, nil
-}
+// // Create user
+// func (ur *userRepository) CreateUser(u *models.User) (*models.User, error) {
+// 	err := ur.db.Model(&u).Create(u).Error
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return u, nil
+// }
 
 
 // Update user
 func (ur *userRepository) UpdateUser(u *models.User) (*models.User, error) {
-
-	err := ur.db.Model(&u).Updates(u).Error
+	println("UpdateUser")
+	var user models.User
+	err := ur.db.Model(&u).Updates(u).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
-	return u, nil
+	return &user, nil
 }
 
 // Delete user by id
