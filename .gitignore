@@ -22,5 +22,5 @@
 *.app
 
 # ignore bin directory
-/bin
-/bin/*
+/.bin
+/.bin/*
