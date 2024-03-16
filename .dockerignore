@@ -1,0 +1,8 @@
+.bin
+./.bin/*
+
+.gitignore
+
+# Ignore all files in the .bin directory
+
+!.bin/
