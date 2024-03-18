@@ -1,11 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
-	 "github.com/gmshuvo/go-gin-postgres/config"
+	"github.com/gmshuvo/go-gin-postgres/config"
+	// "github.com/gmshuvo/go-gin-postgres/middlewares"
 	"github.com/gmshuvo/go-gin-postgres/routes"
 	"github.com/gmshuvo/go-gin-postgres/utils"
-	"os"
 )
 
 func main() {
@@ -21,6 +23,7 @@ func main() {
 
 	// Create routers
 	gin := gin.Default()
+	// gin.Use(middleware.ErrorHandlingMiddleware())
 	
 	gin.SetTrustedProxies([]string{"192.168.0.1"})
 	// make group for  routes

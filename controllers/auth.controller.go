@@ -42,7 +42,12 @@ func (ac *AuthController) Login(c *gin.Context) {
 	// var _body models.User
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid body"})
+		c.JSON(http.StatusBadRequest,
+			models.ErrorResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Invalid input",
+				Details: []string{err.Error()},
+			})
 		return
 	}
 
@@ -51,7 +56,12 @@ func (ac *AuthController) Login(c *gin.Context) {
 	user, err := ac.AuthService.Login(c, &body)
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound,
+			models.ErrorResponse{
+				Code:    http.StatusNotFound,
+				Message: "Invalid credentials",
+				Details: []string{err.Error()},
+			})
 		return
 	}
 
@@ -60,7 +70,12 @@ func (ac *AuthController) Login(c *gin.Context) {
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Invalid User and Password"})
+		c.JSON(http.StatusNotFound, 
+			models.ErrorResponse{
+				Code:    http.StatusNotFound,
+				Message: "Invalid credentials",
+				Details: []string{err.Error()},
+			})
 		return
 	}
 
@@ -68,17 +83,22 @@ func (ac *AuthController) Login(c *gin.Context) {
 	token, err := utils.GenerateToken(user)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating the token"})
+		c.JSON(http.StatusInternalServerError, 
+			models.ErrorResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Error generating token",
+				Details: []string{err.Error()},
+			})
 		return
 	}
 
 	// set token in cookie
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", token, 3600*24*30, "", "", false, true)
+	c.SetCookie("Authorization", token, 3600, "", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"token":      token,
-		"expires_in": 3600 * 24 * 30,
+		"expires_in": 3600,
 	})
 }
 

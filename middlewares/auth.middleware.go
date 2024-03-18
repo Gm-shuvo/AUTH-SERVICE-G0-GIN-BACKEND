@@ -2,59 +2,86 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/gmshuvo/go-gin-postgres/config"
-	"github.com/gmshuvo/go-gin-postgres/models"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gmshuvo/go-gin-postgres/config"
+	"github.com/gmshuvo/go-gin-postgres/models"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func RequireAuth(c *gin.Context) {
-	// Get the cookie off the request
 	tokenString, err := c.Cookie("Authorization")
-
-	println(tokenString)
-
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized,
+			models.ErrorResponse{
+				Code:    http.StatusUnauthorized,
+				Type:    "Unauthorized",
+				Message: "No authorization token provided",
+				Details: []string{err.Error()},
+			})
+		c.Abort()
+		return
 	}
 
-	// Decode/validate it
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 
-	
+	if err != nil {
+		c.JSON(http.StatusUnauthorized,
+			models.ErrorResponse{
+				Code:    http.StatusUnauthorized,
+				Type:    "Unauthorized",
+				Message: "Invalid authorization token",
+				Details: []string{err.Error()},
+			})
+		c.Abort()
+		return
+	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		// Chec k the expiry date
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.JSON(http.StatusUnauthorized,
+				models.ErrorResponse{
+					Code:    http.StatusUnauthorized,
+					Type:    "Unauthorized",
+					Message: "Token has expired",
+				})
+
+			c.Abort()
+			return
 		}
 
-		// Find the user with token Subject
+		userID := claims["sub"]
 		var user models.User
-		config.GetDB().First(&user, claims["sub"])
-
-		if user.ID == 0 {
-			c.AbortWithStatus(http.StatusUnauthorized)
+		result := config.GetDB().First(&user, userID)
+		if result.Error != nil || user.ID == 0 {
+			c.JSON(http.StatusUnauthorized,
+				models.ErrorResponse{
+					Code:    http.StatusUnauthorized,
+					Type:    "Unauthorized",
+					Message: "User not found",
+					Details: []string{result.Error.Error()},
+				})
+			c.Abort()
+			return
 		}
 
-		// Attach the request
 		c.Set("user", user)
-
-		//Continue
 		c.Next()
 	} else {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized,
+			models.ErrorResponse{
+				Code:    http.StatusUnauthorized,
+				Type:    "Unauthorized",
+				Message: "Invalid authorization token",
+			})
+		c.Abort()
 	}
 }
