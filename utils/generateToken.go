@@ -3,20 +3,31 @@ package utils
 import (
 	"os"
 	"time"
-	jwt "github.com/dgrijalva/jwt-go"
+
 	"github.com/gmshuvo/go-gin-postgres/models"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-// GenerateToken is used to generate token
-func GenerateToken(u *models.User) (string, error) {
-	// Generate a JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+func GenerateNewToken(u *models.User) (string, string, error) {
+	// Generate a new access token
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": u.ID,
-		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"exp": time.Now().Add(time.Hour * 1).Unix(),
 	})
-	signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return signedToken, nil
+
+	// Generate a new refresh token
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": u.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessTokenString, refreshTokenString, nil
 }

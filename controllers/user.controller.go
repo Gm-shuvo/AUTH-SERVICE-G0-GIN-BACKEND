@@ -23,7 +23,55 @@ func (uc *UserController) FindAll(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, models.SucecssResponse{
+		Code:    http.StatusOK,
+		Message: "Users found successfully",
+		Data:    users,
+	})
+}
+
+// func (uc *UserController) FindUserByEmail(c *gin.Context) {
+// 	email := c.Query("email")
+// 	user, err := uc.UserService.FindUserByEmail(c, email)
+// 	if err != nil {
+// 		c.JSON(http.StatusNotFound, models.ErrorResponse{
+// 			Code:    http.StatusNotFound,
+// 			Message: "User not found",
+// 			Details: []string{err.Error()},
+// 		})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, models.SucecssResponse{
+// 		Code:    http.StatusOK,
+// 		Message: "User found successfully",
+// 		Data:    user,
+// 	})
+// }
+
+func (uc *UserController) FindUserById(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid ID format",
+			Details: []string{err.Error()},
+		})
+		return
+	}
+	user, err := uc.UserService.FindUserById(c, id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Code:    http.StatusNotFound,
+			Message: "User not found",
+			Details: []string{err.Error()},
+		})
+		return
+	}
+	c.JSON(http.StatusOK, models.SucecssResponse{
+		Code:    http.StatusOK,
+		Message: "User found successfully",
+		Data:    user,
+	})
 }
 
 func (uc *UserController) Update(c *gin.Context) {
@@ -67,7 +115,11 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, updatedUser)
+	c.JSON(http.StatusOK, models.SucecssResponse{
+		Code:    http.StatusOK,
+		Message: "User updated successfully",
+		Data:    updatedUser,
+	})
 }
 
 func (uc *UserController) Delete(c *gin.Context) {
@@ -98,5 +150,8 @@ func (uc *UserController) Delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+	c.JSON(http.StatusOK, models.SucecssResponse{
+		Code:    http.StatusOK,
+		Message: "User deleted successfully",
+	})
 }

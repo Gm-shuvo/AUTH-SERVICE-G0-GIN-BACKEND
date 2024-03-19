@@ -16,6 +16,7 @@ type User struct {
 
 type UserRepository interface {
 	FindUserByEmail( email string) (*User, error)
+	FindUserById( id int) (*User, error)
 	FindAllUsers() ([]User, error)
 	UpdateUser( u *User) (*User, error)
 	DeleteUserById( id int) error
@@ -23,6 +24,7 @@ type UserRepository interface {
 
 type UserService interface {
 	FindUserByEmail(c context.Context, email string) (*User, error)
+	FindUserById(c context.Context, id int) (*User, error)
 	FindAllUsers(c context.Context) ([]User, error)
 	UpdateUser(c context.Context, u *User) (*User, error)
 	DeleteUserById(c context.Context, id int) error

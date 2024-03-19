@@ -17,12 +17,14 @@ func NewUserRouters(router *gin.RouterGroup, db *gorm.DB, timeout time.Duration)
 		UserService: services.NewUserService(ur, timeout),
 	}
 	router.GET("/users", uc.FindAll)
-	// router.GET("/user/:id", uc.FindById)
+	
 	// make group for private routes
 	private := router.Group("")
 	private.Use(middleware.RequireAuth)
 	private.PATCH("/user/:id" , uc.Update)
 	private.DELETE("/user/:id", uc.Delete)
+	private.GET("/user/:id", uc.FindUserById)
+	// private.GET("/user", uc.FindUserByEmail)
 	
 }
 	

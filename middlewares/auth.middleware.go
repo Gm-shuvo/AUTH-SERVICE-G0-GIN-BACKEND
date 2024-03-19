@@ -47,15 +47,20 @@ func RequireAuth(c *gin.Context) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
+			// refresh token exits and valid
+			_, err := c.Cookie("RefreshToken")
+
+			if err != nil {
 			c.JSON(http.StatusUnauthorized,
 				models.ErrorResponse{
 					Code:    http.StatusUnauthorized,
 					Type:    "Unauthorized",
 					Message: "Token has expired",
 				})
-
 			c.Abort()
 			return
+			}
+			// TODO: Generate new access token and refresh token
 		}
 
 		userID := claims["sub"]

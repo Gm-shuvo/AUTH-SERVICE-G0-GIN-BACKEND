@@ -29,13 +29,13 @@ func (us *userService) FindUserByEmail(c context.Context, email string) (*models
 }
 
 // Find user by id
-// func (us *userService) FindUserById(id int) (*models.User, error) {
-// 	user, err := us.userRepository.FindUserById(id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return user, nil
-// }
+func (us *userService) FindUserById(c context.Context, id int) (*models.User, error) {
+	user, err := us.userRepository.FindUserById(id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
 
 // Find all users
 func (us *userService) FindAllUsers(c context.Context) ([]models.User, error) {
@@ -49,6 +49,7 @@ func (us *userService) FindAllUsers(c context.Context) ([]models.User, error) {
 	}
 	return users, nil
 }
+
 
 // Update user
 func (us *userService) UpdateUser(c context.Context, u *models.User) (*models.User, error) {
