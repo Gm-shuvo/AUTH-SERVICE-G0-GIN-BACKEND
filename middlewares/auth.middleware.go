@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gmshuvo/go-gin-postgres/config"
 	"github.com/gmshuvo/go-gin-postgres/models"
+	"github.com/gmshuvo/go-gin-postgres/utils"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -51,16 +52,50 @@ func RequireAuth(c *gin.Context) {
 			_, err := c.Cookie("RefreshToken")
 
 			if err != nil {
-			c.JSON(http.StatusUnauthorized,
-				models.ErrorResponse{
-					Code:    http.StatusUnauthorized,
-					Type:    "Unauthorized",
-					Message: "Token has expired",
-				})
-			c.Abort()
-			return
+				c.JSON(http.StatusUnauthorized,
+					models.ErrorResponse{
+						Code:    http.StatusUnauthorized,
+						Type:    "Unauthorized",
+						Message: "Token has expired",
+					})
+				c.Abort()
+				return
 			}
 			// TODO: Generate new access token and refresh token
+			userID := claims["sub"]
+			var user models.User
+			result := config.GetDB().First(&user, userID)
+			if result.Error != nil || user.ID == 0 {
+				c.JSON(http.StatusUnauthorized,
+					models.ErrorResponse{
+						Code:    http.StatusUnauthorized,
+						Type:    "Unauthorized",
+						Message: "User not found",
+						Details: []string{result.Error.Error()},
+					})
+				c.Abort()
+				return
+			}
+
+			// if user exists, generate new access token and refresh token
+			access_token, refresh_token, err := utils.GenerateNewToken(&user)
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError,
+					models.ErrorResponse{
+						Code:    http.StatusInternalServerError,
+						Message: "Error generating token",
+						Details: []string{err.Error()},
+					})
+				c.Abort()
+				return
+			}
+			c.SetSameSite(http.SameSiteLaxMode)
+			c.SetCookie("Authorization", access_token, 60*60, "/", "localhost", false, true)
+			c.SetCookie("RefreshToken", refresh_token, 60*60*24, "/", "localhost", false, true)
+			c.Set("user", user)
+			c.Next()
+
 		}
 
 		userID := claims["sub"]
