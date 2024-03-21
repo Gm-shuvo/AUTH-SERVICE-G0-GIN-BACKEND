@@ -11,6 +11,7 @@ import (
 
 type AuthController struct {
 	AuthService models.AuthService
+	
 }
 
 // Register new user
